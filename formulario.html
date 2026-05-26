@@ -11,10 +11,6 @@
         integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
-    <link rel='stylesheet'
-        href='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-beta/css/bootstrap.min.css'>
-    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css'>
-    <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto'>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta24/dist/css/tabler.min.css">
@@ -38,7 +34,8 @@
     <div class="page">
         <header class="navbar navbar-expand-md d-print-none bg-blue">
             <div class="container-xl">
-                <div class="logo navbar-brand navbar-brand-autodark d-none-navbar-horizontal p-0 d-flex justify-content-center justify-content-md-start">
+                <div
+                    class="logo navbar-brand navbar-brand-autodark d-none-navbar-horizontal p-0 d-flex justify-content-center justify-content-md-start">
                     <img src="./assets/logo-oficial.png" alt="Logo UNEM" style="width: 200px;">
                 </div>
                 <div class="navbar-nav flex-row order-md-last sigla">
@@ -56,24 +53,93 @@
                 <div class="container-xl py-4">
                     <div class="card card-md">
                         <div class="card-header">
-                            <h3 class="card-title">Datos del Docente</h3>
+                            <h3 class="card-title">Actualización de Datos del Director</h3>
                         </div>
                         <div class="card-body">
                             <form id="datosForm" autocomplete="off" novalidate="">
+
+                                <h4 class="mb-3">Datos Personales</h4>
                                 <div class="row">
-                                    <div class="col-md-4 mb-3">
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label mb-2">Cédula:</label>
+                                        <input type="text" id="cedula" class="form-control" readonly
+                                            style="background-color: #f4f6fa;">
+                                    </div>
+                                    <div class="col-md-3 mb-3">
                                         <label class="form-label mb-2">Nombre:</label>
                                         <input type="text" id="nombre" class="form-control" placeholder="Ej. Juan">
                                     </div>
-                                    <div class="col-md-4 mb-3">
+                                    <div class="col-md-3 mb-3">
                                         <label class="form-label mb-2">Apellido:</label>
                                         <input type="text" id="apellido" class="form-control" placeholder="Ej. Pérez">
                                     </div>
-                                    <div class="col-md-4 mb-3">
-                                        <label class="form-label mb-2">Cédula:</label>
-                                        <input type="text" id="cedula" class="form-control" placeholder="Ej. 12345678">
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label mb-2">Género:</label>
+                                        <select id="genero" class="form-select">
+                                            <option value="">Seleccione...</option>
+                                            <option value="M">Masculino</option>
+                                            <option value="F">Femenino</option>
+                                        </select>
                                     </div>
                                 </div>
+
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label mb-2">Teléfono:</label>
+                                        <input type="tel" id="telefono" class="form-control"
+                                            placeholder="Ej. 04141234567">
+                                    </div>
+                                    <div class="col-md-8 mb-3">
+                                        <label class="form-label mb-2">Dirección Exacta:</label>
+                                        <input type="text" id="direccion" class="form-control"
+                                            placeholder="Ej. Calle Principal, Casa N° 4">
+                                    </div>
+                                </div>
+
+                                <h4 class="mb-3 mt-3">Ubicación Geográfica</h4>
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label mb-2">Estado:</label>
+                                        <select id="estado_id" class="form-select">
+                                            <option value="">Seleccione Estado...</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label mb-2">Municipio:</label>
+                                        <select id="municipio_id" class="form-select">
+                                            <option value="">Seleccione Municipio...</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label mb-2">Parroquia:</label>
+                                        <select id="parroquia_id" class="form-select">
+                                            <option value="">Seleccione Parroquia...</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <h4 class="mb-3 mt-3">Datos Académicos e Institucionales</h4>
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label mb-2">Nivel de Instrucción:</label>
+                                        <select id="nivel_instruccion_id" class="form-select">
+                                            <option value="">Seleccione Instrucción...</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label mb-2">Nivel:</label>
+                                        <select id="nivel_id" class="form-select">
+                                            <option value="">Seleccione Nivel...</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label mb-2">Subnivel:</label>
+                                        <select id="subnivel_id" class="form-select">
+                                            <option value="">Seleccione Subnivel...</option>
+                                        </select>
+                                    </div>
+                                </div>
+
                                 <div class="form-footer mt-4">
                                     <button type="submit" class="btn btn-primary w-100">Guardar Cambios</button>
                                 </div>
@@ -85,7 +151,8 @@
 
             <footer class="footer footer-transparent d-print-none text-muted m-0 pt-3 pe-3 pb-3 ps-3 bg-blue">
                 <div class="container-xl text-center ">
-                    <p class="m-0 text-white">© Copyright <span id="current-year"></span>. Todos los Derechos Reservados.
+                    <p class="m-0 text-white">© Copyright <span id="current-year"></span>. Todos los Derechos
+                        Reservados.
                         Universidad Nacional Experimental del Magisterio Samuel Robinson</p>
                 </div>
             </footer>
