@@ -98,11 +98,17 @@ async function cargarParroquias(municipioId) {
         // Recorremos el arreglo y creamos las opciones
         parroquias.forEach(parroquia => {
             const option = document.createElement('option');
-            option.value = parroquia.id;
+            option.value = parroquia.parroquia_me_id;
             // Seguimos asumiendo que el campo de texto se llama 'nombre'
             option.textContent = parroquia.nombre;
 
             selectParroquia.appendChild(option);
+        });
+
+        console.log('Parroquias cargadas:', parroquias);
+
+        document.getElementById('parroquia_id').addEventListener('change', (e) => {
+            console.log('Parroquia seleccionada:', e.target.value);
         });
 
         console.log(`Parroquias cargadas para el municipio ID: ${municipioId}`);
@@ -207,10 +213,26 @@ async function cargarSubniveles(nivelId) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const token = localStorage.getItem('authToken');
-    const cedula = localStorage.getItem('userCedula') || '';
+    // Intentamos obtener el token y la cédula desde localStorage
+    let token = localStorage.getItem('authToken');
+    let cedula = localStorage.getItem('userCedula') || '';
 
-    // Si no hay token, significa que no ha iniciado sesión o no pasó la verificación
+    // Si no hay token en localStorage, intentamos leerlo desde la query string
+    if (!token) {
+        const params = new URLSearchParams(window.location.search);
+        const tokenFromUrl = params.get('token');
+        const cedulaFromUrl = params.get('cedula');
+        if (tokenFromUrl) {
+            token = tokenFromUrl;
+            localStorage.setItem('authToken', tokenFromUrl);
+        }
+        if (cedulaFromUrl) {
+            cedula = cedulaFromUrl;
+            localStorage.setItem('userCedula', cedulaFromUrl);
+        }
+    }
+
+    // Si aún no hay token, se requiere iniciar sesión
     if (!token) {
         Swal.fire({
             icon: 'error',
@@ -257,6 +279,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('nombre').value = data.data.nombres || '';
         document.getElementById('apellido').value = data.data.apellidos || '';
         document.getElementById('cedula').value = data.data.cedula || '';
+        document.getElementById('nacionalidad').value = data.data.nacionalidad || '';
         document.getElementById('telefono').value = data.data.telefono || '';
         document.getElementById('direccion').value = data.data.direccion || '';
         document.getElementById('genero').value = data.data.genero || '';
@@ -309,21 +332,51 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Prevenimos que la página se recargue al enviar el formulario
         e.preventDefault();
 
+        // Función auxiliar para obtener enteros o null
+        function getIntValue(id) {
+            const val = document.getElementById(id).value;
+            if (!val || val.trim() === '') return null;
+            const num = parseInt(val, 10);
+            return isNaN(num) ? null : num;
+        }
+
         // 1. Recopilamos todos los valores del formulario
         const payload = {
             cedula: document.getElementById('cedula').value, // Incluimos la cédula como identificador
-            nombre: document.getElementById('nombre').value,
-            apellido: document.getElementById('apellido').value,
+            nacionalidad: document.getElementById('nacionalidad').value,
+            nombres: document.getElementById('nombre').value,
+            apellidos: document.getElementById('apellido').value,
             genero: document.getElementById('genero').value,
             telefono: document.getElementById('telefono').value,
             direccion: document.getElementById('direccion').value,
-            estado_id: document.getElementById('estado_id').value,
-            municipio_id: document.getElementById('municipio_id').value,
-            parroquia_id: document.getElementById('parroquia_id').value,
-            nivel_instruccion_id: document.getElementById('nivel_instruccion_id').value,
-            nivel_id: document.getElementById('nivel_id').value,
-            subnivel_id: document.getElementById('subnivel_id').value
+            estado_id: getIntValue('estado_id'),
+            municipio_id: getIntValue('municipio_id'),
+            parroquia_id: getIntValue('parroquia_id'),
+            nivel_instruccion_id: getIntValue('nivel_instruccion_id'),
+            nivel_id: getIntValue('nivel_id'),
+            subnivel_id: getIntValue('subnivel_id')
         };
+
+        const requiredNumbers = ['estado_id', 'municipio_id', 'parroquia_id', 'nivel_instruccion_id', 'nivel_id', 'subnivel_id'];
+        const missingNumbers = requiredNumbers.filter(field => payload[field] === null);
+        if (missingNumbers.length > 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campos incompletos',
+                text: `Debe seleccionar: ${missingNumbers.join(', ')}`
+            });
+            return;
+        }
+
+        // Validar campos de texto
+        if (!payload.nombres || !payload.apellidos || !payload.genero || !payload.telefono || !payload.direccion) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Faltan datos',
+                text: 'Por favor complete todos los campos del formulario.'
+            });
+            return;
+        }
 
         console.log("Datos listos para enviar:", payload);
 
@@ -333,7 +386,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const tokenGuardado = localStorage.getItem('authToken');
 
             // Construimos la URL (Añadimos el token a la URL siguiendo el patrón de tus APIs anteriores)
-            const urlActualizacion = `https://registropnfd.unem.edu.ve/index.php?action=actualizar_director`;
+            const urlActualizacion = `https://registropnfd.unem.edu.ve/index.php?action=actualizar_directores`;
 
             // Hacemos la petición PUT
             const response = await fetch(urlActualizacion, {

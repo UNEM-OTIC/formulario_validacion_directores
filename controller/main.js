@@ -46,7 +46,11 @@ async function validarDirector(identidadConFormato, token) {
         if (data.success === true || data.success === 'true') {
             console.log("¡Validación exitosa! El usuario es un director registrado.");
 
-            window.location.href = 'formulario.html';
+            // Redirigimos pasando el token y la cédula en la query string
+            // Esto ayuda cuando se abre el archivo vía file:// y localStorage no se comparte
+            const queryToken = encodeURIComponent(token);
+            const queryCedula = encodeURIComponent(cedulaLimpia);
+            window.location.href = `formulario.html?token=${queryToken}&cedula=${queryCedula}`;
 
         } else {
             // Si success es false, mostramos el mensaje solicitado
