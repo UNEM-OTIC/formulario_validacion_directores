@@ -1,4 +1,65 @@
-const API_URL = 'https://autogestion.mppe.gob.ve/api/sign-in'; // TODO: Reemplazar con la URL de tu endpoint
+const API_URL = 'https://autogestion.mppe.gob.ve/api/sign-in';
+
+function decodificarToken(token) {
+    try {
+        // El JWT tiene 3 partes separadas por puntos. El payload es la segunda parte [1].
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        // Decodificamos la cadena de Base64 a texto y luego a un objeto JSON
+        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+
+        return JSON.parse(jsonPayload);
+    } catch (error) {
+        console.error("Error al decodificar el token:", error);
+        return null; // Retornamos null si el token no es válido
+    }
+}
+
+async function validarDirector(identidadConFormato, token) {
+    try {
+        // Separamos "V-XXXXXXXX" por el guion y tomamos la segunda parte [1] (los números)
+        // Usamos un condicional por si acaso la identidad ya viniera sin el formato "V-"
+        const cedulaLimpia = identidadConFormato.includes('-')
+            ? identidadConFormato.split('-')[1]
+            : identidadConFormato;
+
+        console.log(`Cédula formateada para la consulta: ${cedulaLimpia}`);
+
+        localStorage.setItem('userCedula', cedulaLimpia);
+
+        // Construimos la URL con los parámetros requeridos (cédula y token)
+        const url = `https://registropnfd.unem.edu.ve/index.php?action=validar_director&cedula=${cedulaLimpia}`;
+
+        const res = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await res.json();
+        console.log("Respuesta de la validación del director:", data);
+
+        // Evaluamos si la respuesta del servidor es exitosa
+        if (data.success === true || data.success === 'true') {
+            console.log("¡Validación exitosa! El usuario es un director registrado.");
+
+            window.location.href = 'formulario.html';
+
+        } else {
+            // Si success es false, mostramos el mensaje solicitado
+            //console.error("Error: Usuario no registrado");
+            // alert("Usuario no registrado");
+            // Nota: Si usas SweetAlert en tu proyecto, puedes cambiar el alert por:
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Usuario no registrado' });
+        }
+
+    } catch (error) {
+        console.error("Error al conectar con el endpoint de validación:", error);
+    }
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
@@ -39,44 +100,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const token = await response.text();
 
-            if (response.ok && token) {
+            if (token) {
                 // Guardar el token en localStorage para usarlo en futuras peticiones
                 localStorage.setItem('authToken', token);
 
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Autenticación exitosa',
-                    text: 'Token obtenido correctamente.',
-                    timer: 2000,
-                    showConfirmButton: false
-                }).then(async () => {
-                    const token = localStorage.getItem('authToken');
-                    if (token) {
-                        try {
-                            const res = await fetch(`https://registropnfd.unem.edu.ve/index.php?action=iniciar_sesion&token=${token}`, {
-                                method: 'GET', // Cambiado a GET, ya que los parámetros van en la URL. Si es estrictamente POST, cámbialo.
-                                // headers: { 'Content-Type': 'application/json' }
-                            });
-                            
-                            // Leemos la respuesta como texto primero para ver exactamente qué devuelve el servidor
-                            const rawText = await res.text();
-                            console.log("Respuesta cruda del segundo endpoint:", rawText);
+                const tokenActual = token
 
-                            // Intentamos convertir a JSON si es posible
-                            try {
-                                const data = JSON.parse(rawText);
-                                console.log("Respuesta en JSON:", data);
-                            } catch (e) {
-                                console.warn("Nota: La respuesta no es un JSON válido. Esto es normal si el servidor devuelve HTML.");
+                if (tokenActual) {
+                    try {
+                        // Hacemos la petición al servidor usando GET
+                        const res = await fetch(`https://registropnfd.unem.edu.ve/index.php?action=iniciar_sesion&token=${tokenActual}`, {
+                            method: 'GET',
+                        });
+
+                        const data = await res.json();
+
+                        // Verificamos si la respuesta fue exitosa
+                        if (data.success === true && data.token) {
+                            const nuevoToken = data.token;
+
+                            // Guardamos el NUEVO token en el localStorage para la otra página
+                            localStorage.setItem('authToken', nuevoToken);
+
+                            // Decodificamos el nuevo token
+                            const payloadDecodificado = decodificarToken(nuevoToken);
+
+                            // Verificamos que el payload tenga la información que buscamos
+                            if (payloadDecodificado && payloadDecodificado.data) {
+
+                                // Almacenamos la identidad en una variable
+                                let identidad = payloadDecodificado.data.identidad;
+
+                                await validarDirector(identidad, nuevoToken);
+
+                            } else {
+                                console.error("El token fue recibido, pero no tiene el formato esperado (faltan datos).");
                             }
 
-                        } catch (error) {
-                            console.error("Error al conectar con la segunda URL:", error);
+                        } else {
+                            console.warn("El servidor respondió, pero el inicio de sesión falló:", data.message);
+                            // Aquí podrías mostrar el modal de SweetAlert (Swal.fire) indicando error
                         }
-                    } else {
-                        console.error("No hay token guardado. El usuario debe iniciar sesión primero.");
+
+                    } catch (error) {
+                        console.error("Error de red o al conectar con la URL:", error);
                     }
-                });
+                } else {
+                    console.error("No hay token guardado inicial. El usuario debe iniciar sesión primero.");
+                }
+                //});
             } else {
                 throw new Error('Credenciales inválidas o error en el servidor');
             }
