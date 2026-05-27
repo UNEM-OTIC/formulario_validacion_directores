@@ -57,7 +57,7 @@ async function validarDirector(identidadConFormato, token) {
             //console.error("Error: Usuario no registrado");
             // alert("Usuario no registrado");
             // Nota: Si usas SweetAlert en tu proyecto, puedes cambiar el alert por:
-            Swal.fire({ icon: 'error', title: 'Error', text: 'Usuario no registrado' });
+            Swal.fire({ icon: 'error', title: 'Error', text: data.error });
         }
 
     } catch (error) {
@@ -102,10 +102,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ email, password })
             });
 
-            const token = await response.text();
+            const tipoContenido = response.headers.get('content-type');
 
-            if (token) {
+            if (tipoContenido.includes('text/plain')) {
                 // Guardar el token en localStorage para usarlo en futuras peticiones
+                const token = await response.text();
+
                 localStorage.setItem('authToken', token);
 
                 const tokenActual = token
@@ -121,6 +123,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         // Verificamos si la respuesta fue exitosa
                         if (data.success === true && data.token) {
+
+                            await Swal.fire({
+                                icon: 'success',
+                                title: 'Inicio de sesión exitoso',
+                                confirmButtonText: 'Continuar'
+                            });
                             const nuevoToken = data.token;
 
                             // Guardamos el NUEVO token en el localStorage para la otra página
@@ -152,9 +160,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     console.error("No hay token guardado inicial. El usuario debe iniciar sesión primero.");
                 }
-                //});
             } else {
-                throw new Error('Credenciales inválidas o error en el servidor');
+                const data = await response.json();
+                await Swal.fire({
+                    icon: 'warning',
+                    title: 'Error de autenticación',
+                    text: data.alert.message,
+                });
+                //throw new Error('Credenciales inválidas o error en el servidor');
             }
         } catch (error) {
             console.error('Error de autenticación:', error);

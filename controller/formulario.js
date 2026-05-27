@@ -1,3 +1,13 @@
+// Detector de carga desde la caché (BFCache)
+window.addEventListener('pageshow', (event) => {
+    // Si la página se está mostrando desde la memoria caché del navegador...
+    if (event.persisted) {
+        console.warn("Se detectó una carga desde la caché. Forzando recarga de seguridad...");
+        // ...forzamos a que la página se recargue completamente
+        window.location.reload();
+    }
+});
+
 // Función para obtener y mostrar la lista de estados
 async function cargarEstados() {
     try {
@@ -380,6 +390,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         console.log("Datos listos para enviar:", payload);
 
+        // NUEVO: Capturamos el botón de guardar y guardamos su texto original
+        const btnGuardar = document.querySelector('#datosForm button[type="submit"]');
+        const textoOriginalBtn = btnGuardar.innerHTML;
+
+        // NUEVO: Mostramos el spinner y deshabilitamos el botón
+        btnGuardar.disabled = true;
+        btnGuardar.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Guardando...';
+
         // 2. Preparamos el envío al servidor
         try {
             // Recuperamos el token por si la API lo requiere para autorizar la actualización
@@ -408,8 +426,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 Swal.fire({
                     icon: 'success',
                     title: '¡Datos Guardados!',
-                    text: 'La información del director ha sido actualizada correctamente.',
-                    confirmButtonText: 'Aceptar'
+                    text: result.message,
+                    showCancelButton: true, // Habilita el segundo botón
+                    confirmButtonText: 'Finalizar', // Botón principal
+                    cancelButtonText: 'Continuar edición', // Botón secundario
+                    confirmButtonColor: '#206bc4', // Color azul (estilo Tabler/Bootstrap)
+                    cancelButtonColor: '#6c757d'  // Color gris
+                }).then((swalResult) => {
+                    if (swalResult.isConfirmed) {
+                        // Si hizo clic en "Finalizar"
+                        localStorage.removeItem('authToken');
+                        localStorage.removeItem('userCedula'); 
+                        window.location.replace('index.html'); 
+                    } 
                 });
             } else {
                 // Si success es false, mostramos el mensaje de error del servidor (o uno por defecto)
@@ -427,6 +456,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 title: 'Error de Red',
                 text: 'No se pudo conectar con el servidor. Verifique su conexión a internet.'
             });
+        } finally {
+            // NUEVO: Restauramos el botón a su estado original pase lo que pase
+            btnGuardar.disabled = false;
+            btnGuardar.innerHTML = textoOriginalBtn;
         }
     });
 });
