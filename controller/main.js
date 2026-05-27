@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                             await Swal.fire({
                                 icon: 'success',
-                                title: 'Inicio de sesión exitoso',
+                                title: 'Datos validados en Autogestión',
                                 confirmButtonText: 'Continuar'
                             });
                             const nuevoToken = data.token;
