@@ -25,7 +25,6 @@ async function validarDirector(identidadConFormato, token) {
             ? identidadConFormato.split('-')[1]
             : identidadConFormato;
 
-        console.log(`Cédula formateada para la consulta: ${cedulaLimpia}`);
 
         localStorage.setItem('userCedula', cedulaLimpia);
 
@@ -40,11 +39,9 @@ async function validarDirector(identidadConFormato, token) {
         });
 
         const data = await res.json();
-        console.log("Respuesta de la validación del director:", data);
 
         // Evaluamos si la respuesta del servidor es exitosa
         if (data.success === true || data.success === 'true') {
-            console.log("¡Validación exitosa! El usuario es un director registrado.");
 
             // Redirigimos pasando el token y la cédula en la query string
             // Esto ayuda cuando se abre el archivo vía file:// y localStorage no se comparte

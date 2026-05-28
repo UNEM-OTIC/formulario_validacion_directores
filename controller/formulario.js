@@ -37,7 +37,6 @@ async function cargarEstados() {
             selectEstado.appendChild(option);
         });
 
-        console.log("Estados cargados correctamente.");
 
     } catch (error) {
         console.error("Error al cargar la lista de estados:", error);
@@ -77,7 +76,6 @@ async function cargarMunicipios(estadoId) {
             selectMunicipio.appendChild(option);
         });
 
-        console.log(`Municipios cargados para el estado ID: ${estadoId}`);
 
     } catch (error) {
         console.error("Error al cargar la lista de municipios:", error);
@@ -115,14 +113,6 @@ async function cargarParroquias(municipioId) {
             selectParroquia.appendChild(option);
         });
 
-        console.log('Parroquias cargadas:', parroquias);
-
-        document.getElementById('parroquia_id').addEventListener('change', (e) => {
-            console.log('Parroquia seleccionada:', e.target.value);
-        });
-
-        console.log(`Parroquias cargadas para el municipio ID: ${municipioId}`);
-
     } catch (error) {
         console.error("Error al cargar la lista de parroquias:", error);
     }
@@ -154,7 +144,6 @@ async function cargarNivelInstruccion() {
             selectNivelInstruccion.appendChild(option);
         });
 
-        console.log("Niveles de instrucción cargados correctamente.");
 
     } catch (error) {
         console.error("Error al cargar la lista de niveles de instrucción:", error);
@@ -181,7 +170,6 @@ async function cargarNiveles() {
             selectNivel.appendChild(option);
         });
 
-        console.log("Niveles cargados correctamente.");
 
     } catch (error) {
         console.error("Error al cargar la lista de niveles:", error);
@@ -215,7 +203,6 @@ async function cargarSubniveles(nivelId) {
             selectSubnivel.appendChild(option);
         });
 
-        console.log(`Subniveles cargados para el nivel ID: ${nivelId}`);
 
     } catch (error) {
         console.error("Error al cargar la lista de subniveles:", error);
@@ -284,7 +271,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         const data = await response.json();
-        console.log("Datos obtenidos del servidor:", data.data);
 
         document.getElementById('nombre').value = data.data.nombres || '';
         document.getElementById('apellido').value = data.data.apellidos || '';
@@ -388,7 +374,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        console.log("Datos listos para enviar:", payload);
 
         // NUEVO: Capturamos el botón de guardar y guardamos su texto original
         const btnGuardar = document.querySelector('#datosForm button[type="submit"]');
@@ -419,7 +404,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Leemos la respuesta del servidor
             const result = await response.json();
-            console.log("Respuesta de actualización:", result);
 
             // 3. Evaluamos si la actualización fue exitosa
             if (result.success === true || result.success === 'true') {
